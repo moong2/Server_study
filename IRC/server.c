@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
 	}
 
 	//TCP 연결지향형이고 IPv4 도메인을 위한 소켓 생성
-	if ((serv_sock = socket(AF_INET, SOCK_STREAM, 0)) == -1);
+	if ((serv_sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 		error_handling("socket error");
 
 	//SO_REUSEADDR 옵션 설정
@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
 	//주소를 초기화한 후 IP 주소와 포트 지정
 	memset(&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sin_family = AF_INET;	//타입 : IPv4
-	serv_addr.sin_addr.s_addr = htonl(inet_addr(INADDR_ANY));	//ip 주소
+	serv_addr.sin_addr.s_addr = INADDR_ANY;	//ip 주소 (htonl(inet_addr(INADDR_ANY)))
 	serv_addr.sin_port = htons(port);	//포트
 
 	//소켓과 서버 주소를 바인딩
