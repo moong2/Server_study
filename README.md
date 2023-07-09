@@ -1,3 +1,11 @@
+[1. socket](#socket) <br>
+[2. setsockopt](#setsockopt) <br>
+[3. fcntl](#fcntl) <br>
+[4. sockaddr, sockaddr_in](#sockaddr-sockaddr_in) <br>
+[5. bind](#bind) <br>
+[6. listen](#listen) <br>
+[99. 논블록](#논블록) <br>
+
 ## socket
 ``` c
 int socket(int domain, int type, int protocol);
@@ -108,7 +116,7 @@ cmd가 F_SETFL일 경우,
 - O_NONBLOCK: 논블로킹 모드로 파일을 열기 위한 플래그입니다.
 - O_CREAT: 파일이 존재하지 않으면 새로운 파일을 생성하는 플래그입니다.
 
-## sockaddr_in
+## sockaddr, sockaddr_in
 ``` c
 struct sockaddr_in {
 	__uint8_t       sin_len;
@@ -224,6 +232,6 @@ int listen(int sockfd, int backlog);
 >	- 서버가 연결을 수락할 준비가 되었을 때 대기 큐에서 순차적으로 연결 수락
 - 대기 큐의 길이를 제한하여 동시에 처리할 수 있는 연결 요청의 수를 조절하는 역할
 
-## 블로킹을 거는 법
+## 논블록
 1. fcntl에 O_NONBLOCK옵션을 주어 파일 열고 닫기에 논블로킹
 2. select, poll, epoll, kqueue 등 I/O 멀티플렉싱으로 I/O 작업 블로킹
