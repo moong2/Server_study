@@ -393,4 +393,4 @@ ssize_t send(int socket, void *buffer, size_t length, int flags);
 
 ## 논블록
 1. fcntl에 O_NONBLOCK옵션을 주어 파일 열고 닫기에 논블로킹
-2. select, poll, epoll, kqueue 등 I/O 멀티플렉싱으로 I/O 작업 블로킹
+2. select, poll, epoll, kqueue 등 I/O 멀티플렉싱으로 I/O 작업 논블로킹
