@@ -64,11 +64,6 @@ void success_handler(int socket)
 
 int main(int argc, char **argv) 
 {
-	int clnt_sock;
-
-	//sockaddr_in은 소켓 주소의 틀을 형성해주는 구조체로 AF_INET(IPv4)일 경우 사용
-	struct sockaddr_in serv_addr;
-
 	if (argc != 2)
 	{
 		printf("Please, Insert Port Number\n");
@@ -91,6 +86,8 @@ int main(int argc, char **argv)
 	char *end;
 	long port = strtol(argv[1], &end, 10);
 
+	//sockaddr_in은 소켓 주소의 틀을 형성해주는 구조체로 AF_INET(IPv4)일 경우 사용
+	struct sockaddr_in serv_addr;
 	//주소를 초기화한 후 IP 주소와 포트 지정
 	memset(&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sin_family = AF_INET;	//타입 : IPv4
