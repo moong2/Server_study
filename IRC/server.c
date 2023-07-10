@@ -68,8 +68,6 @@ int main(int argc, char **argv)
 
 	//sockaddr_in은 소켓 주소의 틀을 형성해주는 구조체로 AF_INET(IPv4)일 경우 사용
 	struct sockaddr_in serv_addr;
-	struct sockaddr_in clnt_addr; //accept 함수에서 사용됨
-	socklen_t clnt_addr_size;
 
 	if (argc != 2)
 	{
