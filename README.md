@@ -7,6 +7,8 @@
 [7. kqueue](#kqueue) <br>
 [8. kevent](#kevent) <br>
 [9. accept](#accept) <br>
+[10. recv](#recv) <br>
+[11. send](#send) <br>
 [99. 논블록](#논블록) <br>
 
 ## socket
