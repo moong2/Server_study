@@ -4,6 +4,9 @@
 [4. sockaddr, sockaddr_in](#sockaddr-sockaddr_in) <br>
 [5. bind](#bind) <br>
 [6. listen](#listen) <br>
+[7. kqueue](#kqueue) <br>
+[8. kevent](#kevent) <br>
+[9. accept](#accept) <br>
 [99. 논블록](#논블록) <br>
 
 ## socket
@@ -231,6 +234,160 @@ int listen(int sockfd, int backlog);
 >	- 클라이언트의 연결 요청을 임시로 보관하는 공간
 >	- 서버가 연결을 수락할 준비가 되었을 때 대기 큐에서 순차적으로 연결 수락
 - 대기 큐의 길이를 제한하여 동시에 처리할 수 있는 연결 요청의 수를 조절하는 역할
+
+## kqueue
+```c
+int kqueue(void);
+```
+
+### 헤더
+<sys/types.h> <br>
+<sys/event.h>
+
+### 정의
+이벤트 기반 I/O 멀티플렉싱을 제공하는 기능<br>
+파일 디스크립터에 대한 이벤트를 추적하고 관리하기 위한 I/O 이벤트 큐를 생성하며, 이벤트 큐는 다양한 유형의 이벤트를 모니터링하고 처리하기 위해 사용됨 <br>
+주로 비동기 I/O 타이머, 시그널 등을 처리하는데 사용 <br>
+블로킹하지 않고 이벤트를 기다릴 수 있는 효율적인 I/O 멀티플렉싱 기법
+
+### 반환
+성공 시 새로운 이벤트 큐(kqueue)를 생성하고 해당 큐의 파일 디스크립터 반환, 실패 시 -1
+
+## kevent
+```c
+int kevent(int kq, const struct kevent *changelist, int nchanges, struct kevent *eventlist, int nevents, const struct timespec *timeout);
+```
+
+### 헤더
+<sys/types.h> <br>
+<sys/event.h>
+
+### 정의
+kqueue를 통해 생성된 이벤트 큐에서 이벤트를 등록하고 모니터링하는 기능을 제공
+
+### 반환
+- 성공적으로 이벤트를 모니터링했거나 등록/수정한 경우 변경에 대한 정보를 eventlist에 채우고, 실제 채워진 이벤트 개수를 반환
+- 이벤트가 발생하지 않거나 등록/수정할 이벤트가 없는 경우 아무 작업도 수행하지 않고 0을 반환
+- 호출에 실패한 경우 -1을 반환
+
+### 파라미터
+#### int kq
+- 이벤트 큐(kqueue)의 파일 디스크립터
+
+#### const struct kevent *changelist
+- 등록하거나 수정할 이벤트를 담고 있는 struct kevent 배열
+
+> ```c
+>struct kevent {
+>	uintptr_t       ident;  /* identifier for this event */
+>	int16_t         filter; /* filter for event */
+>	uint16_t        flags;  /* general flags */
+>	uint32_t        fflags; /* filter-specific flags */
+>	intptr_t        data;   /* filter-specific data */
+>	void            *udata; /* opaque user data identifier */
+>};
+>```
+> 1. **ident** : 이벤트 식별자로 파일 디스크립터, 소켓, 신호 번호 등을 지정하여 이벤트가 발생하는 대상을 식별
+> 2. **filter** : 이벤트 필터이며 이벤트의 유형을 지정
+> 3. **flags** : 이벤트 플래그이며 이벤트 동작을 설정
+> 4. **fflags** : 필터별 추가 플래그이며 필터에 따라 특정 플래그를 설정하여 필터마다 의미가 다를 수 있음
+> 5. **data** : 이벤트 데이터이며 필터에 따라 추가 정보를 담을 수 있음 ex) 데이터의 길이 포함
+> 6. **udata** : 사용자 정의 데이터이며 이벤트와 연결된 사용자 정의 데이터를 저장할 수 있는 옵션값
+>
+>```c
+>EV_SET(kev, ident, filter, flags, fflags, data, udata);
+>```
+>struct kevent 구조체의 필드를 초기화하고 설정하는 함수나 매크로
+> - **kev**: struct kevent 구조체의 포인터입니다. 설정하려는 이벤트에 대한 정보를 담는 구조체
+
+#### int nchanges
+- changelist에 있는 이벤트의 개수
+
+#### struct kevent *eventlist
+- 모니터링된 이벤트를 저장할 struct kevent 배열
+
+#### int nevents
+- eventlist 배열의 크기 (모니터링할 이벤트의 최대 개수)
+
+#### const struct timespce *timeout
+- 타임아웃을 설정하는 구조체인 struct timespec 포인터
+
+## accept
+```c
+int accept(int socket, struct sockaddr *address, socklen_t *address_len);
+```
+
+### 헤더
+<sys/socket.h>
+
+### 정의
+서버 소켓에서 클라이언트의 연결을 수락하는데 사용되는 함수
+
+### 반환
+성공 시 연결된 소켓의 파일 디스크립터, 실패 시 -1
+
+### 파라미터
+#### int socket
+- 서버 소켓의 파일 디스크립터이며 bind, listen 함수를 통해 연결을 받을 준비가 되어 있어야 함
+
+#### struct sockaddr *address
+- 클라이언트의 주소 정보를 저장하기 위한 sockaddr 구조체 포인터
+
+#### socklen_t *address_len
+- address 구조체의 크기를 나타내는 socklen_t 타입의 포인터
+
+## recv
+```c
+ssize_t recv(int socket, void *buffer, size_t length, int flags);
+```
+
+### 헤더
+<sys/socket.h>
+
+### 정의
+소켓으로부터 데이터를 수신하는데 사용되는 함수
+
+### 반환
+- 성공적으로 데이터를 수신한 경우, 반환값은 수신한 데이터의 길이로 0 이상의 값을 가짐
+- 수신된 데이터가 없어서 더 이상 읽을 데이터가 없는 경우, recv 함수는 0을 반환하며 일반적으로 소켓 연결이 종료되었음을 나타냄
+- 실패 시 -1을 반환
+
+### 파라미터
+#### int socket
+- 데이터를 수신할 소켓의 파일 디스크립터
+
+#### void *buffer
+- 수신한 데이터를 저장할 버퍼의 포인터
+
+#### size_t length
+- 버퍼의 크기를 나타내는 값으로, 수신할 데이터의 최대 길이를 지정
+
+#### int flags
+- 수신 작업에 대한 특정 플래그를 설정하고 0으로 설정 시 기본 동작을 수행
+
+## send
+```c
+ssize_t send(int socket, void *buffer, size_t length, int flags);
+```
+
+### 헤더
+<sys/socket.h>
+
+### 반환
+성공 시 전송한 데이터의 길이를 반환, 실패 시 -1 반환
+
+### 파라미터
+#### int socket
+- 데이터를 전송할 소켓의 파일 디스크립터
+
+#### void *buffer
+- 전송할 데이터가 담긴 버퍼의 포인터
+
+#### size_t length
+- 전송할 데이터의 길이를 나타내는 값
+
+#### int flags
+- 전송 작업에 대한 특정 플래그를 설정하고 0으로 설정 시 기본 동작 수행
 
 ## 논블록
 1. fcntl에 O_NONBLOCK옵션을 주어 파일 열고 닫기에 논블로킹
