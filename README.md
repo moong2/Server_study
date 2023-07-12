@@ -70,6 +70,16 @@ int setsockopt(int socket, int level, int option_name, const void *option_value,
 - SO_RCVBUF 및 SO_SNDBUF: 수신 버퍼와 송신 버퍼의 크기를 설정합니다.
 - SO_LINGER: 연결이 종료될 때 커널에서 소켓을 얼마나 오랫동안 유지할지 지정합니다.
 
+> SO_REUSEADDR
+> - 특정 ip + port로 bind 되어 있는 socket이 server 종료 시 혹은 실행 중 어떤 이유로 닫혔을 때 해당 socket은 TIME-WAIT 상태가 되고 특별한 설정이 없었다면 2MSL 동안 bind가 불가능해짐
+> - SO_REUSEADDR을 설정할 경우 Server는 2MSL을 기다리지 않고 바로 ip + port를 재사용할 수 있음
+> - TIME-WAIT socket들이 남지만 이는 정상적인 종료 절차이며 server에 문제가 되지 않음
+
+> SO_LINGER
+> - struct linger의 주소를 setsockopt의 option_value로 넘겨주며 l_onoff가 0이 아니고 l_linger가 양의 정수로 설정될 경우, server가 socket을 close했을 대 아직 보내지지 않은 데이터가 남아 있다면 l_linger초 만큼 close를 block하게 됨
+> - l_linger값을 0으로 설정하면 정상적인 TCP 연결 종료 절차가 시작되지 않으며 socket이 TIME-WAIT 상태에 빠지지 않음
+> - 비정상적으로 TCP 연결을 끊기 때문에 이전 TCP 연결이 제대로 정리되지 않아 Connection Reset by Peer 에러가 발생할 위험이 높음
+
 #### const void *option_value
 - 설정하려는 옵션 값이 담긴 변수
 - 1이면 활성화, 0이면 비활성화

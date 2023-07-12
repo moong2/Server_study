@@ -25,10 +25,14 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	serv_sock=socket(PF_INET, SOCK_STREAM, 0);
+
+	printf("serv_sock : %d\n", serv_sock);
+
 	//SO_REUSEADDR 옵션 설정
 	int option = 1;
 	if (setsockopt(serv_sock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) == -1)
 		error_handling("setsock error");
+
 	int flag=fcntl(serv_sock, F_GETFL, 0);
 	fcntl(serv_sock, F_SETFL, flag|O_NONBLOCK);
 	memset(&serv_adr, 0, sizeof(serv_adr));
@@ -45,8 +49,6 @@ int main(int argc, char *argv[])
 	FD_SET(serv_sock, &reads);
 	FD_SET(serv_sock, &writes);
 	fd_max=serv_sock;
-
-	printf("fd_max : %d\n", fd_max);
 
 	while(1)
 	{
