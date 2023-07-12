@@ -398,6 +398,9 @@ ssize_t send(int socket, void *buffer, size_t length, int flags);
 
 ## I/O 멀티플렉싱 함수 비교
 ### Select
+```c
+int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds, struct timeval * timeout);
+```
 #### 장점
 - 파일 디스크립터의 수에 제한이 없음
 - 이벤트 발생 시에 대기하는 파일 디스크립터만 처리하므로 관련 비용이 낮음
@@ -406,6 +409,10 @@ ssize_t send(int socket, void *buffer, size_t length, int flags);
 - 파일 디스크립터 집합을 매번 복사해야 함
 
 ### poll
+```c
+int poll(struct pollfd fds[], nfds_t nfds, int timeout);
+```
+
 #### 장점
 - select의 배열 대신 구조체를 사용하여 파일 디스크립터 수에 **이론적**으로는 제한이 없음
 - select와 다르게 구조체를 사용하여 개별 디스크립터에 대한 정보와 상태를 더 쉽게 관리할 수 있음
@@ -426,6 +433,11 @@ ssize_t send(int socket, void *buffer, size_t length, int flags);
 - 특정 모드 사용 중 이벤트 유실 가능
 
 ### kqueue
+```c
+int kqueue(void);
+
+int kevent(int kq, const struct kevent *changelist, int nchanges, struct kevent *eventlist, int nevents, const struct timespec *timeout);
+```
 #### 장점
 - 파일 디스크립터 개수에 제한이 없음
 - I/O 이벤트가 발생한 파일 디스크립터만 반환하므로 높은 성능
