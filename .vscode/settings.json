@@ -62,6 +62,11 @@
 		"algorithm": "c",
 		"__verbose_abort": "cpp",
 		"bit": "cpp",
-		"inet.h": "c"
+		"inet.h": "c",
+		"stdbool.h": "c",
+		"unistd.h": "c",
+		"types.h": "c",
+		"select.h": "c",
+		"list": "cpp"
 	}
 }
