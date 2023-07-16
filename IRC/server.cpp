@@ -6,6 +6,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <sys/event.h>
+#include "Message.hpp"
 
 #define BUFSIZE 512
 
@@ -14,10 +15,9 @@ int g_serv_sock;
 // 이벤트 큐
 int g_event_queue;
 
-void error_handling(char* message) 
+void error_handling(std::string message) 
 {
-	fputs(message, stderr);
-	fputc('\n', stderr);
+	std::cerr << message << std::endl;
 	exit(1);
 }
 
@@ -26,6 +26,27 @@ void add_socket(int socket)
 	struct kevent event;
 	EV_SET(&event, socket, EVFILT_READ | EVFILT_WRITE, EV_ADD, 0, 0, 0);
 	kevent(g_event_queue, &event, 1, 0, 0, 0);
+}
+
+void remove_socket(int socket) 
+{
+	struct kevent event;
+	EV_SET(&event, socket, EVFILT_READ | EVFILT_WRITE, EV_ADD, 0, 0, 0);
+	kevent(g_event_queue, &event, 1, 0, 0, 0);
+}
+
+void print(Message message) {
+	std::cout << "prefix : " << message.prefix_ << std::endl;
+	std::cout << "command : " << message.command_ << std::endl;
+	std::cout << "parameters : ";
+	for (std::vector<std::string>::iterator it = message.params_.begin(); it != message.params_.end(); it++) 
+	{
+		std::cout << *it;
+		if (it + 1 != message.params_.end()) std::cout << ", ";
+	}
+	std::cout << std::endl;
+	std::cout << "trailing : " << message.trailing_ << std::endl;
+	std::cout << std::endl;
 }
 
 void success_handler(int socket)
@@ -55,10 +76,24 @@ void success_handler(int socket)
 
 		message[nRcv] = '\0';
 
-		printf("ReceiveMessage : %s\n", message);
+		//parsing
+		std::string str(message);
+		Message IRCmessage = Message::parseMessage(str);
+		print(IRCmessage);
 
-		char *check_message = "Server accept\n\0";
-		send(socket, check_message, (int)strlen(check_message), 0);
+		std::string check_message = "Server accept\n\0";
+		send(socket, check_message.c_str(), check_message.size(), 0);
+	}
+}
+
+void error_handler(int socket)
+{
+	if (g_serv_sock == socket) {
+		std::cerr << "server socket event error" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	else {
+		close(socket);
 	}
 }
 
@@ -122,24 +157,29 @@ int main(int argc, char **argv)
 		{
 			struct kevent* cur_event = &events[i];
 
+			//순서가 바뀌면 READ, EOF 같이 들어감. if-else if 문이 나은가?
+			if (cur_event->flags & EV_ERROR)
+			{
+				std::cout << "This is ERROR" << std::endl;
+				error_handler(cur_event->ident);
+			}
 			if (cur_event->filter == EVFILT_WRITE)
 			{
 				printf("This is write");
 				exit(1);
 			}
-			if (cur_event->filter == EVFILT_READ)
-			{
-				success_handler(cur_event->ident);
-			}
 			if (cur_event->flags & EV_EOF)
 			{
-				printf("This is EOF");
-				exit(1);
+				std::cout << "This is EOF" << std::endl;
+
+				// error_handler(cur_event->ident);
+
+				// remove_socket(cur_event->ident);
 			}
-			if (cur_event->flags & EV_ERROR)
+			if (cur_event->filter == EVFILT_READ)
 			{
-				printf("This is error");
-				exit(1);
+				std::cout << "This is Read" << std::endl;
+				success_handler(cur_event->ident);
 			}
 		}
 	}

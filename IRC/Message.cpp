@@ -1,6 +1,6 @@
 #include "Message.hpp"
 
-Message parseMessage(const std::string &str) {
+Message Message::parseMessage(const std::string &str) {
 	Message message;
 	std::istringstream iss(str);
 	std::string params;
