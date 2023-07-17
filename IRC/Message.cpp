@@ -1,12 +1,15 @@
 #include "Message.hpp"
 
-Message Message::parse(const std::string &str)
+std::vector<Message> Message::parse(const std::string &str)
 {
-	Message message;
+	std::vector<Message> message;
 	std::vector<std::string> messages;
 
-	messages = split(str, "\r\n");
-	message = parseMessage(*messages.begin());
+	messages = split(str, "\\r\\n");
+	for (std::vector<std::string>::iterator it = messages.begin(); it != messages.end(); it++)
+	{
+		message.push_back(parseMessage(*it));
+	}
 
 	return message;
 }

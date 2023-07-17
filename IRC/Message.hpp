@@ -14,7 +14,7 @@ class Message {
 		std::string trailing_;
 		bool hasTrailing_;
 
-		static Message parse(const std::string &str);
+		static std::vector<Message> parse(const std::string &str);
 
 	private:
 		static std::vector<std::string> split(const std::string &res, const std::string &del);
