@@ -78,7 +78,7 @@ void success_handler(int socket)
 
 		//parsing
 		std::string str(message);
-		Message IRCmessage = Message::parseMessage(str);
+		Message IRCmessage = Message::parse(str);
 		print(IRCmessage);
 
 		std::string check_message = "Server accept\n\0";
